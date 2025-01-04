@@ -2,7 +2,10 @@ import { LinkedInRequest } from "../core/linkedin-request.js";
 
 import type {
     EducationItem,
+    EducationView,
     ExperienceItem,
+    PagedList,
+    PositionView,
     Profile,
     ProfileContactInfo,
     ProfileSkills,
@@ -71,72 +74,11 @@ async getMe() {
 
     const { profile, educationView, positionView } = res
     const miniProfile = profile.miniProfile
-    const education: Profile['education'] = educationView
-      ? {
-        paging: {
-          offset: educationView.paging.start,
-          count: educationView.paging.count,
-          total: educationView.paging.total
-        },
-        elements: educationView.elements.map((item) => {
-          const educationItem: EducationItem = {
-            entityUrn: item.entityUrn,
-            schoolName: item.schoolName,
-            degreeName: item.degreeName,
-            fieldOfStudy: item.fieldOfStudy,
-            startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
-            endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
-            school: {
-              name: item.school?.schoolName ?? item.schoolName,
-              entityUrn: item.school?.entityUrn,
-              id: getIdFromUrn(item.school?.entityUrn),
-              active: item.school?.active,
-              logo: resolveLinkedVectorImageUrl(item.school?.logo)
-            }
-          }
+    
+    const education: Profile['education'] = this.parseEducationView(educationView)
 
-          return educationItem
-        })
-      }
-      : undefined
-
-    const experience: Profile['experience'] = positionView
-      ? {
-        paging: {
-          offset: positionView.paging.start,
-          count: positionView.paging.count,
-          total: positionView.paging.total
-        },
-        elements: positionView.elements.map((item) => {
-          const companyUrn =
-            item.companyUrn ?? item.company?.miniCompany?.entityUrn!
-
-          const experienceItem: ExperienceItem = {
-            entityUrn: item.entityUrn,
-            title: item.title,
-            companyName: item.companyName,
-            description: item.description,
-            location: item.locationName,
-            startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
-            endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
-            company: {
-              entityUrn: companyUrn,
-              id: getIdFromUrn(companyUrn),
-              publicIdentifier: item.company?.miniCompany?.universalName,
-              name: item.company?.miniCompany?.name ?? item.companyName,
-              industry: item.company?.industries?.[0],
-              logo: resolveLinkedVectorImageUrl(
-                item.company?.miniCompany?.logo
-              ),
-              employeeCountRange: item.company?.employeeCountRange
-            }
-          }
-
-          return experienceItem
-        })
-      }
-      : undefined
-
+    const experience: Profile['experience'] = this.parsePositionView(positionView)
+    
     // TODO: add other sections (skills, recommendations, etc.)
     const result: Profile = {
       id: getIdFromUrn(res.entityUrn)!,
@@ -161,6 +103,81 @@ async getMe() {
     }
 
     return result
+  }
+
+  parseEducationView(educationView: EducationView | undefined): PagedList<EducationItem> | undefined {
+
+    const education: PagedList<EducationItem> | undefined  = educationView
+    ? {
+      paging: {
+        offset: educationView.paging.start,
+        count: educationView.paging.count,
+        total: educationView.paging.total
+      },
+      elements: educationView.elements.map((item) => {
+        const educationItem: EducationItem = {
+          entityUrn: item.entityUrn,
+          schoolName: item.schoolName,
+          degreeName: item.degreeName,
+          fieldOfStudy: item.fieldOfStudy,
+          startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
+          endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
+          school: {
+            name: item.school?.schoolName ?? item.schoolName,
+            entityUrn: item.school?.entityUrn,
+            id: getIdFromUrn(item.school?.entityUrn),
+            active: item.school?.active,
+            logo: resolveLinkedVectorImageUrl(item.school?.logo)
+          }
+        }
+
+        return educationItem
+      })
+    }
+    : undefined
+    return education
+  }
+
+  parsePositionView(positionView: PositionView | undefined): PagedList<ExperienceItem> | undefined{
+
+    const experience: PagedList<ExperienceItem> | undefined  = positionView
+    ? {
+      paging: {
+        offset: positionView.paging.start,
+        count: positionView.paging.count,
+        total: positionView.paging.total
+      },
+      elements: positionView.elements.map((item) => {
+        const companyUrn =
+          item.companyUrn ?? item.company?.miniCompany?.entityUrn!
+
+        const experienceItem: ExperienceItem = {
+          entityUrn: item.entityUrn,
+          title: item.title,
+          companyName: item.companyName,
+          description: item.description,
+          location: item.locationName,
+          startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
+          endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
+          company: {
+            entityUrn: companyUrn,
+            id: getIdFromUrn(companyUrn),
+            publicIdentifier: item.company?.miniCompany?.universalName,
+            name: item.company?.miniCompany?.name ?? item.companyName,
+            industry: item.company?.industries?.[0],
+            logo: resolveLinkedVectorImageUrl(
+              item.company?.miniCompany?.logo
+            ),
+            employeeCountRange: item.company?.employeeCountRange
+          }
+        }
+
+        return experienceItem
+      })
+    }
+    : undefined
+
+    return experience
   }
 
   /**
@@ -205,8 +222,39 @@ async getMe() {
   }
 
   /**
+   * * Fetch PositionView (paged positions) in the same format as getProfile.
+   *
+   * @param id The target LinkedIn user's public identifier or internal URN ID.
+   */
+  async getProfilePositions(
+    idOrOptions: string | { id: string; offset?: number; limit?: number }
+  ) {
+    const {
+      id,
+      offset = 0,
+      limit = 100
+    } = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions
+
+    const resolvedId = isLinkedInUrn(id) ? getIdFromUrn(id)! : id
+
+    await this.auth.ensureAuthenticated()
+
+    return this.request.apiKy
+      .get(`identity/profiles/${resolvedId}/positions`, {
+        searchParams: {
+          count: limit,
+          start: offset
+        }
+      })
+      .json<PositionView>()
+  }
+
+
+
+  /**
    * @param urnId The target LinkedIn user's internal URN ID.
    */
+  
   async getProfileExperiences(urnId: string): Promise<ExperienceItem[]> {
     if (isLinkedInUrn(urnId)) {
       urnId = getIdFromUrn(urnId)!
