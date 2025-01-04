@@ -48,6 +48,12 @@ describe('LinkedInClient', () => {
 
   }, 30_000)
 
+  it("getProfileRaw('chrispawley') with fetchMissingItems", async () => {
+    const res = await linkedin.profile.getProfileRaw('chrispawley', true)
+    await writeResponseToFile(res, './test/example/profile-raw-chrispawley_with-missing-items.json');
+
+  }, 30_000)
+
   it("getProfilePositions('chrispawley')", async () => {
     const res = await linkedin.profile.getProfilePositions('chrispawley')
     await writeResponseToFile(res, './test/example/profile-positions-chrispawley.json');

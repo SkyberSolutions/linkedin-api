@@ -27,7 +27,7 @@ export class LinkedInClient implements Client {
   static readonly MAX_REPEATED_REQUESTS = 200
 
   
-  protected logger: Logger | null
+  private logger?: Logger
 
   protected auth: LinkedInAuth
   private request: LinkedInRequest
@@ -43,7 +43,7 @@ export class LinkedInClient implements Client {
     baseUrl = 'https://www.linkedin.com',
     ky = defaultKy,
     throttle = true,
-    logger = null,
+    logger = undefined,
     apiHeaders = {},
     authHeaders = {}
   }: {
@@ -52,7 +52,7 @@ export class LinkedInClient implements Client {
     baseUrl?: string
     ky?: KyInstance
     throttle?: boolean
-    logger?: Logger | null
+    logger?: Logger
     apiHeaders?: Record<string, string>
     authHeaders?: Record<string, string>
   } = {}) {
@@ -65,7 +65,7 @@ export class LinkedInClient implements Client {
       password: password,
       baseUrl: baseUrl,
       ky: ky,
-      logger: logger,
+      logger: this.logger,
       authHeaders: authHeaders
     })
 
@@ -75,12 +75,12 @@ export class LinkedInClient implements Client {
         baseUrl: baseUrl,
         ky: ky,
         throttle: throttle,
-        logger: logger,
+        logger: this.logger,
         apiHeaders: apiHeaders,
       }
     )
 
-    this.profile = new ProfileRequest(this.request, this.auth)
+    this.profile = new ProfileRequest(this.request, this.auth, this.logger)
     this.company = new CompanyRequest(this.request, this.auth)
     this.school = new SchoolRequest(this.request, this.auth)
     this.job = new JobRequest(this.request, this.auth)

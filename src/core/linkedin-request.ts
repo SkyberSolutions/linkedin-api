@@ -12,7 +12,7 @@ const defaultThrottle = pThrottle({
 
 export class LinkedInRequest {
     private _apiKy: KyInstance
-    private logger: Logger | null
+    private logger?: Logger
     private client?: Client
     
     constructor({
@@ -20,14 +20,14 @@ export class LinkedInRequest {
         baseUrl = 'https://www.linkedin.com',
         ky = defaultKy,
         throttle = true,
-        logger = null,
+        logger = undefined,
         apiHeaders = {},
       }: {
         client?: Client
         baseUrl?: string
         ky?: KyInstance
         throttle?: boolean
-        logger?: Logger | null
+        logger?: Logger
         apiHeaders?: Record<string, string>
         authHeaders?: Record<string, string>
       } = {}) {

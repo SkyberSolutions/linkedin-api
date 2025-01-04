@@ -24,7 +24,7 @@ export class LinkedInAuth {
   public readonly config: Conf
 
   protected authKy: KyInstance
-  protected logger: Logger | null
+  protected logger?: Logger
   private client?: Client
 
   protected _cookies?: Record<string, SetCookie>
@@ -39,7 +39,7 @@ export class LinkedInAuth {
     password = getEnv('LINKEDIN_PASSWORD'),
     baseUrl = 'https://www.linkedin.com',
     ky = defaultKy,
-    logger = null,
+    logger = undefined,
     authHeaders = {}
   }: {
     client?: Client,
@@ -47,7 +47,7 @@ export class LinkedInAuth {
     password?: string
     baseUrl?: string
     ky?: KyInstance
-    logger?: Logger | null
+    logger?: Logger
     authHeaders?: Record<string, string>
   } = {}) {
     assert(

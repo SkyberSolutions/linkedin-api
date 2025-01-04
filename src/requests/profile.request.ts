@@ -5,6 +5,7 @@ import type {
     EducationView,
     ExperienceItem,
     PagedList,
+    Paging,
     PositionView,
     Profile,
     ProfileContactInfo,
@@ -24,13 +25,16 @@ import type {
   import { LinkedInAuth } from '../core/linkedin-auth.js'
   
 import { LinkedInClient } from "../core/linkedin-client.js";
+import { Logger } from "../utils/logger/logger.js";
  
 export class ProfileRequest{
     private request: LinkedInRequest
     private auth: LinkedInAuth
-    constructor(request: LinkedInRequest, auth: LinkedInAuth) {
+    private logger?: Logger
+    constructor(request: LinkedInRequest, auth: LinkedInAuth, logger?: Logger) {
         this.request = request
         this.auth = auth
+        this.logger = logger
     }
 
 /**
@@ -50,8 +54,10 @@ async getMe() {
    * Returns the raw data from the LinkedIn API without normalizing it.
    *
    * @param id The LinkedIn user's public identifier or internal URN ID.
+   * @param fetchMissingItems If PositionView etc does not contain all items
+   * fetch them. profileView only contains most recent 5 or so positions for example.
    */
-  async getProfileRaw(id: string): Promise<ProfileView> {
+  async getProfileRaw(id: string, fetchMissingItems: boolean = false): Promise<ProfileView> {
     if (isLinkedInUrn(id)) {
       id = getIdFromUrn(id)!
     }
@@ -59,9 +65,26 @@ async getMe() {
     await this.auth.ensureAuthenticated()
 
     // NOTE: the `/profileView` sub-route returns more detailed data.
-    return this.request.apiKy
+    const profileView =  await this.request.apiKy
       .get(`identity/profiles/${id}/profileView`)
       .json<ProfileView>()
+
+
+    if(fetchMissingItems && !this.isPagingComplete(profileView.positionView.paging)) {
+      const itemCount = profileView.positionView.paging.count
+      const itemTotal = profileView.positionView.paging.total
+      this.logger?.debug(`PositionView incomplete: ${itemCount} of ${itemTotal} items`)
+
+      profileView.positionView = await this.getProfilePositions({id: id, limit: itemTotal})
+      this.logger?.debug(`PositionView re-fetched: ${profileView.positionView.paging.count} of ${profileView.positionView.paging.total} items`)
+    }
+
+    return profileView
+  }
+
+
+  isPagingComplete(paging: Paging): boolean {
+    return paging.count === paging.total
   }
 
   /**
@@ -74,7 +97,7 @@ async getMe() {
 
     const { profile, educationView, positionView } = res
     const miniProfile = profile.miniProfile
-    
+
     const education: Profile['education'] = this.parseEducationView(educationView)
 
     const experience: Profile['experience'] = this.parsePositionView(positionView)
