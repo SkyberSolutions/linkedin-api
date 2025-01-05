@@ -36,34 +36,25 @@ describe('LinkedInClient', () => {
     expect(res.id).toBe('ACoAAAdVCacB9uO3u3vDtvGPnDQeweefI2nV0gw')
   }, 30_000)
 
-  it("getProfileRaw('chrispawley')", async () => {
-    const res = await linkedin.profile.getProfileRaw('chrispawley')
-    await writeResponseToFile(res, './test/example/profile-raw-chrispawley.json');
-
-  }, 30_000)
-
-  it("getProfileRaw('chrispawley')", async () => {
-    const res = await linkedin.profile.getProfileRaw('chrispawley')
-    await writeResponseToFile(res, './test/example/profile-raw-chrispawley.json');
-
-  }, 30_000)
-
+ 
   it("getProfileRaw('chrispawley') with fetchMissingItems", async () => {
     const res = await linkedin.profile.getProfileRaw('chrispawley', true)
-    await writeResponseToFile(res, './test/example/profile-raw-chrispawley_with-missing-items.json');
 
-  }, 30_000)
-
-  it("getProfilePositions('chrispawley')", async () => {
-    const res = await linkedin.profile.getProfilePositions('chrispawley')
-    await writeResponseToFile(res, './test/example/profile-positions-chrispawley.json');
-
-  }, 30_000)
-
-  it("getProfileSkills('chrispawley')", async () => {
-    const res = await linkedin.profile.getProfileSkills('ACoAAAyzwfMBFQDk2KohwcQbrShKZf49BQJCdnw')
-    await writeResponseToFile(res, './test/example/profile-skills-chrispawley.json');
-
+    //expect(res.positionGroupView.paging.count).toEqual(res.positionGroupView.paging.total)
+    expect(res.patentView.paging.count).toEqual(res.patentView.paging.total)
+    expect(res.educationView.paging.count).toEqual(res.educationView.paging.total)
+    expect(res.organizationView.paging.count).toEqual(res.organizationView.paging.total)
+    expect(res.positionView.paging.count).toEqual(res.positionView.paging.total)
+    expect(res.languageView.paging.count).toEqual(res.languageView.paging.total)
+    expect(res.certificationView.paging.count).toEqual(res.certificationView.paging.total)
+    expect(res.testScoreView.paging.count).toEqual(res.testScoreView.paging.total)
+    expect(res.volunteerCauseView.paging.count).toEqual(res.volunteerCauseView.paging.total)
+    expect(res.courseView.paging.count).toEqual(res.courseView.paging.total)
+    expect(res.honorView.paging.count).toEqual(res.honorView.paging.total)
+    expect(res.skillView.paging.count).toEqual(res.skillView.paging.total)
+    expect(res.volunteerExperienceView.paging.count).toEqual(res.volunteerExperienceView.paging.total)
+    expect(res.publicationView.paging.count).toEqual(res.publicationView.paging.total)
+    
   }, 30_000)
 
   it(
