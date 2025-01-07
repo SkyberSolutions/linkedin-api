@@ -7,8 +7,8 @@ import { writeResponseToFile } from './test-util.js'
 
 describe('LinkedInClient', () => {
   let linkedin: LinkedInClient
-  //let id = 'chris-pawley'
-  let id = 'ACoAAAyzwfMBFQDk2KohwcQbrShKZf49BQJCdnw' // id for chris-pawley
+  let id = 'chrispawley'
+  //let id = 'ACoAAAyzwfMBFQDk2KohwcQbrShKZf49BQJCdnw' // id for chris-pawley
   //let id = 'fisch2'
   //let id = 'ACoAAAdVCacB9uO3u3vDtvGPnDQeweefI2nV0gw' // id for fitch2
 
