@@ -84,29 +84,33 @@ export class ProfileRequest {
 
     if (fullProfile) {
 
+      profileView.positionView = await this.updateIfNeeded(profileView.positionView, id) 
 
-
-      if (!this.isPagingComplete(profileView.positionView.paging)) {
-        const itemCount = profileView.positionView.paging.count
-        const itemTotal = profileView.positionView.paging.total
-        this.logger?.debug(`PositionView incomplete: ${itemCount} of ${itemTotal} items`)
-
-        profileView.positionView = await this.getProfilePositions({ id: id, limit: itemTotal })
-        this.logger?.debug(`PositionView re-fetched: ${profileView.positionView.paging.count} of ${profileView.positionView.paging.total} items`)
-      }
+      
 
     }
-
-
-
 
     return profileView
   }
 
+/**
+ * Re-fetched the view if all paging items have not been
+ * included in getProfileRaw()
+ */
+private async updateIfNeeded(currentView: PositionView, id: string) {
+  if (currentView.paging.count !== currentView.paging.total) {
+    const itemCount = currentView.paging.count
+    const itemTotal = currentView.paging.total
+    this.logger?.debug(`${currentView.constructor.name} incomplete: ${itemCount} of ${itemTotal} items`)
 
-  isPagingComplete(paging: Paging): boolean {
-    return paging.count === paging.total
+    currentView = await this.getProfileData<PositionView>({ id: id, limit: itemTotal }, 'positions'), 
+    this.logger?.debug(`${currentView.constructor.name} re-fetched: ${currentView.paging.count} of ${currentView.paging.total} items`)
   }
+  return currentView
+}
+
+
+ 
 
   /**
    * Fetches basic profile information for a given LinkedIn user.

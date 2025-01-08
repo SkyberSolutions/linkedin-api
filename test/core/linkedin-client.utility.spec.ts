@@ -30,7 +30,7 @@ describe('LinkedInClient', () => {
     await writeResponseToFile(res, `./test/example/profile-raw-${id}.json`);
   }, 30_000)
 
-  it("SAVE: getProfileRaw(id) with fetchMissingItems", async () => {
+  it("SAVE: getProfileRaw(id) with fullProfile==true", async () => {
     const res = await linkedin.profile.getProfileRaw('chrispawley', true)
     await writeResponseToFile(res, `./test/example/profile-raw-full-${id}.json`);
   }, 30_000)
