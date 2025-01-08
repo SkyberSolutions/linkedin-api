@@ -1,3 +1,11 @@
+/**
+ * Raw model from API
+ */
+
+export interface PagedView<T> {
+  paging: Paging
+  elements: T[]
+}
 
 export interface Paging {
   start: number
@@ -5,7 +13,9 @@ export interface Paging {
   total: number
   links: any[]
 }
-
+/**
+ * Parsed model
+ */
 export interface PagedList<T> {
   paging: PagingResponse
   elements: T[]

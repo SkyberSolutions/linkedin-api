@@ -3,7 +3,7 @@ import { TimePeriod } from "./date.type.js"
 import { LinkedVectorImage } from "./image.type.js"
 import { DefaultLocale, SupportedLocale } from "./locale.type.js"
 import { GeoLocation, Location } from "./location.type.js"
-import { PagedList, Paging } from "./paging.type.js"
+import { PagedList, PagedView, Paging } from "./paging.type.js"
 
 export interface ProfileView {
     entityUrn: string
@@ -93,24 +93,26 @@ export interface ProfileView {
     profileId: string
     elements: any[]
   }
+
+  export interface PositionViewItem {
+    entityUrn: string
+    title: string
+    description?: string
+    timePeriod: TimePeriod
+    companyUrn: string
+    companyName: string
+    company?: Company
+    locationName?: string
+    geoLocationName?: string
+    geoUrn?: string
+    region?: string
+  }
   
-  export interface PositionView {
+  export interface PositionView extends PagedView<PositionViewItem> {
     paging: Paging
     entityUrn: string
     profileId: string
-    elements: {
-      entityUrn: string
-      title: string
-      description?: string
-      timePeriod: TimePeriod
-      companyUrn: string
-      companyName: string
-      company?: Company
-      locationName?: string
-      geoLocationName?: string
-      geoUrn?: string
-      region?: string
-    }[]
+    elements: PositionViewItem[]
   }
   
   export interface ProfileViewProfile {

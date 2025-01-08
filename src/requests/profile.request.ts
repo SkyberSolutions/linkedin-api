@@ -10,13 +10,12 @@ import type {
   LanguageView,
   OrganizationView,
   PagedList,
-  Paging,
+  PagedView,
   PatentView,
   PositionGroupView,
   PositionView,
   Profile,
   ProfileContactInfo,
-  ProfileSkills,
   ProfileView,
   PublicationView,
   SelfProfile,
@@ -84,12 +83,34 @@ export class ProfileRequest {
 
     if (fullProfile) {
 
-      profileView.positionView = await this.updateIfNeeded(profileView.positionView, id) 
+      profileView.skillView = await this.updateIfNeeded(profileView.skillView, 'SkillView', id, this.getProfileSkills.bind(this))
+
+      
+      profileView.positionView = await this.updateIfNeeded(profileView.positionView, 'PositionView', id, this.getProfilePositions.bind(this))
 
       
 
-    }
+      profileView.patentView = await this.updateIfNeeded(profileView.patentView, 'PatentView', id, this.getProfilePatents.bind(this))
 
+      profileView.educationView = await this.updateIfNeeded(profileView.educationView, 'EducationView', id, this.getProfileEducations.bind(this))
+
+      profileView.organizationView = await this.updateIfNeeded(profileView.organizationView, 'OrganizationView', id, this.getProfileOrganizations.bind(this))
+
+      profileView.languageView = await this.updateIfNeeded(profileView.languageView, 'LanguageView', id,  this.getProfileLanguages.bind(this))
+
+      profileView.certificationView = await this.updateIfNeeded(profileView.certificationView, 'CertificationView', id, this.getProfileCertifications.bind(this))
+
+      profileView.testScoreView = await this.updateIfNeeded(profileView.testScoreView, 'TestScoreView', id, this.getProfileTestScores.bind(this))
+
+      profileView.courseView = await this.updateIfNeeded(profileView.courseView, 'CourseView', id, this.getProfileCourses.bind(this))
+
+      profileView.honorView = await this.updateIfNeeded(profileView.honorView, 'HonorView', id, this.getProfileHonors.bind(this))
+
+      profileView.publicationView = await this.updateIfNeeded(profileView.publicationView, 'PublicationView', id, this.getProfilePublications.bind(this))
+
+      
+      
+    }
     return profileView
   }
 
@@ -97,20 +118,17 @@ export class ProfileRequest {
  * Re-fetched the view if all paging items have not been
  * included in getProfileRaw()
  */
-private async updateIfNeeded(currentView: PositionView, id: string) {
-  if (currentView.paging.count !== currentView.paging.total) {
+private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName: string, id: string, fetcher: (idOrOptions: IdOrOptions) => Promise<T>): Promise<T> {
+  if (currentView.paging.total > currentView.paging.count) {
     const itemCount = currentView.paging.count
     const itemTotal = currentView.paging.total
-    this.logger?.debug(`${currentView.constructor.name} incomplete: ${itemCount} of ${itemTotal} items`)
+    this.logger?.debug(`${viewName} incomplete: ${itemCount} of ${itemTotal} items`)
 
-    currentView = await this.getProfileData<PositionView>({ id: id, limit: itemTotal }, 'positions'), 
-    this.logger?.debug(`${currentView.constructor.name} re-fetched: ${currentView.paging.count} of ${currentView.paging.total} items`)
+    currentView = await fetcher({ id: id, limit: itemTotal })
+    this.logger?.debug(`${viewName} re-fetched: ${currentView.paging.count} of ${currentView.paging.total} items`)
   }
   return currentView
 }
-
-
- 
 
   /**
    * Fetches basic profile information for a given LinkedIn user.
@@ -249,88 +267,90 @@ private async updateIfNeeded(currentView: PositionView, id: string) {
   /**
    * * Fetch SkillView (paged positions) in the same format as getProfile.
    */
-  async getProfileSkills(idOrOptions: IdOrOptions) {
-    return this.getProfileData<SkillView>(idOrOptions, 'skills');
+  async getProfileSkills(idOrOptions: IdOrOptions): Promise<SkillView> {
+    return this.getProfileData(idOrOptions, 'skills');
   }
 
   /**
    * * Fetch PositionView (paged positions) in the same format as getProfile.
    */
-  async getProfilePositions(idOrOptions: IdOrOptions) {
-    return this.getProfileData<PositionView>(idOrOptions, 'positions');
+  async getProfilePositions(idOrOptions: IdOrOptions): Promise<PositionView> {
+    return this.getProfileData(idOrOptions, 'positions');
   }
 
   /**
    * * Fetch PatentView (paged patents) in the same format as getProfile.
    */
-  async getProfilePatents(idOrOptions: IdOrOptions) {
-    return this.getProfileData<PatentView>(idOrOptions, 'patents');
+  async getProfilePatents(idOrOptions: IdOrOptions): Promise<PatentView> {
+    return this.getProfileData(idOrOptions, 'patents');
   }
 
   /**
    * * Fetch EducationView (paged schools) in the same format as getProfile.
    */
-  async getProfileEducations(idOrOptions: IdOrOptions) {
-    return this.getProfileData<EducationView>(idOrOptions, 'educations');
+  async getProfileEducations(idOrOptions: IdOrOptions): Promise<EducationView> {
+    return this.getProfileData(idOrOptions, 'educations');
   }
 
   /**
    * * Fetch OrganizationView (paged organizations) in the same format as getProfile.
    */
-  async getProfileOrganizations(idOrOptions: IdOrOptions) {
-    return this.getProfileData<OrganizationView>(idOrOptions, 'organizations');
+  async getProfileOrganizations(idOrOptions: IdOrOptions): Promise<OrganizationView> {
+    return this.getProfileData(idOrOptions, 'organizations');
   }
 
   /**
    * * Fetch LanguageView (paged languages) in the same format as getProfile.
    */
-  async getProfileLanguages(idOrOptions: IdOrOptions) {
-    return this.getProfileData<LanguageView>(idOrOptions, 'languages');
+  async getProfileLanguages(idOrOptions: IdOrOptions): Promise<LanguageView> {
+    return this.getProfileData(idOrOptions, 'languages');
   }
 
   /**
    * * Fetch CertificationView (paged certifications) in the same format as getProfile.
    */
-  async getProfileCertifications(idOrOptions: IdOrOptions) {
-    return this.getProfileData<CertificationView>(idOrOptions, 'certifications');
+  async getProfileCertifications(idOrOptions: IdOrOptions): Promise<CertificationView> {
+    return this.getProfileData(idOrOptions, 'certifications');
   }
 
   /**
    * * Fetch TestScoreView (paged testscores) in the same format as getProfile.
    */
-  async getProfileTestScores(idOrOptions: IdOrOptions) {
-    return this.getProfileData<TestScoreView>(idOrOptions, 'testScores');
+  async getProfileTestScores(idOrOptions: IdOrOptions): Promise<TestScoreView> {
+    return this.getProfileData(idOrOptions, 'testScores');
     // Not testscores, test-scores, test_scores, testScores, scores
   }
 
   /**
   * * Fetch CourseView (paged course) in the same format as getProfile.
   */
-  async getProfileCourses(idOrOptions: IdOrOptions) {
-    return this.getProfileData<CourseView>(idOrOptions, 'courses');
+  async getProfileCourses(idOrOptions: IdOrOptions): Promise<CourseView> {
+    return this.getProfileData(idOrOptions, 'courses');
   }
 
   /**
 * * Fetch HonorView (paged honor) in the same format as getProfile.
 */
-  async getProfileHonors(idOrOptions: IdOrOptions) {
-    return this.getProfileData<HonorView>(idOrOptions, 'honors');
+  async getProfileHonors(idOrOptions: IdOrOptions): Promise<HonorView> {
+    return this.getProfileData(idOrOptions, 'honors');
   }
 
 /**
 * * Fetch PublicationView (paged publication) in the same format as getProfile.
 */
-  async getProfilePublications(idOrOptions: IdOrOptions) {
-    return this.getProfileData<PublicationView>(idOrOptions, 'publications');
+  async getProfilePublications(idOrOptions: IdOrOptions): Promise<PublicationView> {
+    return this.getProfileData(idOrOptions, 'publications');
   }
 
 
   /**
      * * Generic function to fetch profile data.
+     * TODO: Split requests if limit too high?
      *
      * @param id The target LinkedIn user's public identifier or internal URN ID.
      */
-  private async getProfileData<T>(idOrOptions: string | { id: string; offset?: number; limit?: number }, apiPath: string): Promise<T> {
+  private async getProfileData<T>(idOrOptions: IdOrOptions, apiPath: string): Promise<T>  {
+   
     const {
       id,
       offset = 0,
