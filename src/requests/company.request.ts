@@ -14,13 +14,12 @@ import {
   normalizeRawOrganization,
   
 } from '../core/linkedin-utils.js'
+import { Auth } from "../core/auth.js";
  
 export class CompanyRequest{
     private request: LinkedInRequest
-    private auth: LinkedInAuth
-    constructor(request: LinkedInRequest, auth: LinkedInAuth) {
+    constructor(request: LinkedInRequest) {
         this.request = request
-        this.auth = auth
     }
 
     /**
@@ -34,9 +33,7 @@ export class CompanyRequest{
       id = getIdFromUrn(id)!
     }
 
-    await this.auth.ensureAuthenticated()
-
-    const res = await this.request.apiKy
+    const res = await this.request
       .get('organization/companies', {
         searchParams: {
           decorationId:
@@ -60,9 +57,6 @@ export class CompanyRequest{
     return normalizeRawOrganization(rawOrganization)
   }
 
-
-
-
   /**
    * Fetch company updates (newsfeed activity) for a given LinkedIn company.
    *
@@ -79,7 +73,7 @@ export class CompanyRequest{
       limit = LinkedInClient.MAX_UPDATE_COUNT
     } = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions
 
-    const res = await this.request.apiKy
+    const res = await this.request
       .get('feed/updates', {
         searchParams: {
           companyUniversalName: id,

@@ -12,17 +12,15 @@ import {
   isLinkedInUrn,
   normalizeRawOrganization,
 } from '../core/linkedin-utils.js'
+import { Auth } from "../core/auth.js";
 
  
 export class SchoolRequest{
     private request: LinkedInRequest
-    private auth: LinkedInAuth
 
-    constructor(request: LinkedInRequest, auth: LinkedInAuth) {
+    constructor(request: LinkedInRequest) {
         this.request = request
-        this.auth = auth
     }
-
 
  /**
    * Fetches basic data about a school on LinkedIn. Returns the raw data from
@@ -38,9 +36,7 @@ export class SchoolRequest{
     id = getIdFromUrn(id)!
   }
 
-  await this.auth.ensureAuthenticated()
-
-  const res = await this.request.apiKy
+  const res = await this.request
     .get('organization/companies', {
       searchParams: {
         decorationId:

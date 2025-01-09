@@ -5,8 +5,9 @@ import defaultKy, { type KyInstance } from 'ky'
 import { assert, encodeCookies, getConfigForUser, getEnv } from '../utils/index.js'
 import { Logger } from '../utils/logger/logger.js'
 import { Client } from './linkedin-client.js'
+import type { Auth } from './auth.js'
 
-export class LinkedInAuth {
+export class LinkedInAuth implements Auth {
   // max seems to be 100 posts per page (currently unused)
   // static readonly MAX_POST_COUNT = 100
 
@@ -95,10 +96,10 @@ export class LinkedInAuth {
     return this._sessionId
   }
 
-  async ensureAuthenticated() {
+  async ensureAuthenticated(): Promise<boolean> {
     if (this._isAuthenticated) {
       this.logger?.log('LinkedInAuth: Is already authenticated');
-      return
+      return this._isAuthenticated
     } 
 
     const setCookies = this.config.get('cookies') as string
@@ -106,6 +107,7 @@ export class LinkedInAuth {
       try {
         this._setAuthCookies(setCookies)
         this._isAuthenticated = true
+        return this._isAuthenticated
       } catch (err: any) {
         this.logger?.warn(
           'LinkedInAuth: Error renewing expired auth cookies',

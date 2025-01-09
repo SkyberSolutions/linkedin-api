@@ -18,13 +18,12 @@ import {
   resolveImageUrl,
 } from '../core/linkedin-utils.js'
 import { assert } from '../utils/index.js'
+import { Auth } from "../core/auth.js";
 
 export class SearchRequest{
     private request: LinkedInRequest
-    private auth: LinkedInAuth
-    constructor(request: LinkedInRequest, auth: LinkedInAuth) {
+    constructor(request: LinkedInRequest) {
         this.request = request
-        this.auth = auth
     }
 
   /**
@@ -37,7 +36,6 @@ export class SearchRequest{
     limit = LinkedInClient.MAX_SEARCH_COUNT,
     ...opts
   }: SearchParams): Promise<SearchResponse> {
-    await this.auth.ensureAuthenticated()
 
     const response: SearchResponse = {
       paging: {
@@ -70,7 +68,7 @@ export class SearchRequest{
       `&queryId=voyagerSearchDashClusters.bb967969ef89137e6dec45d038310505`
     // this.logger?.log(uri)
 
-    const res = await this.request.apiKy
+    const res = await this.request
       .get(uri, {
         headers: {
           accept: 'application/vnd.linkedin.normalized+json+2.1'

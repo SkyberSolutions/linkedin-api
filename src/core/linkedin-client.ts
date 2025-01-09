@@ -7,6 +7,7 @@ import { CompanyRequest } from '../requests/company.request.js'
 import { SchoolRequest } from '../requests/school.request.js'
 import { JobRequest } from '../requests/job.request.js'
 import { SearchRequest } from '../requests/search.request.js'
+import type { Auth } from './auth.js'
 
 export interface Client {
   updateApiKyHeaders(csrfToken: string, encodedCookies: string): void
@@ -29,7 +30,7 @@ export class LinkedInClient implements Client {
   
   private logger?: Logger
 
-  protected auth: LinkedInAuth
+  protected auth: Auth
   private request: LinkedInRequest
   profile: ProfileRequest
   company: CompanyRequest
@@ -71,7 +72,7 @@ export class LinkedInClient implements Client {
 
     this.request = new LinkedInRequest(
       {
-        client: this,
+        auth: this.auth,
         baseUrl: baseUrl,
         ky: ky,
         throttle: throttle,
@@ -80,12 +81,11 @@ export class LinkedInClient implements Client {
       }
     )
 
-    this.profile = new ProfileRequest(this.request, this.auth, this.logger)
-    this.company = new CompanyRequest(this.request, this.auth)
-    this.school = new SchoolRequest(this.request, this.auth)
-    this.job = new JobRequest(this.request, this.auth)
-    this.search = new SearchRequest(this.request, this.auth)
-
+    this.profile = new ProfileRequest(this.request, this.logger)
+    this.company = new CompanyRequest(this.request)
+    this.school = new SchoolRequest(this.request)
+    this.job = new JobRequest(this.request)
+    this.search = new SearchRequest(this.request)
   }
 
   async ensureReady() {

@@ -5,13 +5,12 @@ import {
   getIdFromUrn,
   isLinkedInUrn
 } from '../core/linkedin-utils.js'
+import { Auth } from "../core/auth.js";
  
 export class JobRequest{
     private request: LinkedInRequest
-    private auth: LinkedInAuth
-    constructor(request: LinkedInRequest, auth: LinkedInAuth) {
+    constructor(request: LinkedInRequest) {
         this.request = request
-        this.auth = auth
     }
 
   
@@ -25,9 +24,7 @@ export class JobRequest{
     jobId = getIdFromUrn(jobId)!
   }
 
-  await this.auth.ensureAuthenticated()
-
-  const res = await this.request.apiKy
+  const res = await this.request
     .get(`jobs/jobPostings/${jobId}`, {
       searchParams: {
         decorationId:

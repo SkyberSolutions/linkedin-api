@@ -31,21 +31,18 @@ import {
   stringifyLinkedInDate
 } from '../core/linkedin-utils.js'
 
-import { LinkedInAuth } from '../core/linkedin-auth.js'
-
 import { LinkedInClient } from "../core/linkedin-client.js";
 import { Logger } from "../utils/logger/logger.js";
+import { Auth } from "../core/auth.js";
 
 // Utility type for the idOrOptions parameter
 type IdOrOptions = string | { id: string; offset?: number; limit?: number };
 
 export class ProfileRequest {
   private request: LinkedInRequest
-  private auth: LinkedInAuth
   private logger?: Logger
-  constructor(request: LinkedInRequest, auth: LinkedInAuth, logger?: Logger) {
+  constructor(request: LinkedInRequest, logger?: Logger) {
     this.request = request
-    this.auth = auth
     this.logger = logger
   }
 
@@ -53,9 +50,7 @@ export class ProfileRequest {
      * Fetches basic profile information for the authenticated user.
      */
   async getMe() {
-    await this.auth.ensureAuthenticated()
-
-    const res = await this.request.apiKy.get('me')
+    const res = await this.request.get('me')
 
     return res.json<SelfProfile>()
   }
@@ -74,10 +69,8 @@ export class ProfileRequest {
       id = getIdFromUrn(id)!
     }
 
-    await this.auth.ensureAuthenticated()
-
     // NOTE: the `/profileView` sub-route returns more detailed data.
-    const profileView = await this.request.apiKy
+    const profileView = await this.request
       .get(`identity/profiles/${id}/profileView`)
       .json<ProfileView>()
 
@@ -108,8 +101,6 @@ export class ProfileRequest {
 
       profileView.publicationView = await this.updateIfNeeded(profileView.publicationView, 'PublicationView', id, this.getProfilePublications.bind(this))
 
-      
-      
     }
     return profileView
   }
@@ -254,9 +245,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
       id = getIdFromUrn(id)!
     }
 
-    await this.auth.ensureAuthenticated()
-
-    return this.request.apiKy
+    return this.request
       .get(`identity/profiles/${id}/profileContactInfo`)
       .json<ProfileContactInfo>()
   }
@@ -359,9 +348,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
 
     const resolvedId = isLinkedInUrn(id) ? getIdFromUrn(id)! : id;
 
-    await this.auth.ensureAuthenticated();
-
-    return this.request.apiKy
+    return this.request
       .get(`identity/profiles/${resolvedId}/${apiPath}`, {
         searchParams: {
           count: limit,
@@ -387,9 +374,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
 
     const resolvedId = isLinkedInUrn(id) ? getIdFromUrn(id)! : id
 
-    await this.auth.ensureAuthenticated()
-
-    return this.request.apiKy
+    return this.request
       .get(`identity/profiles/${resolvedId}/positionGroups`, {
         searchParams: {
           count: limit,
@@ -410,8 +395,6 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
       urnId = getIdFromUrn(urnId)!
     }
 
-    await this.auth.ensureAuthenticated()
-
     const profileUrn = `urn:li:fsd_profile:${urnId}`
     const variables = [
       `profileUrn:${encodeURIComponent(profileUrn)}`,
@@ -420,7 +403,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
     const queryId =
       'voyagerIdentityDashProfileComponents.7af5d6f176f11583b382e37e5639e69e'
 
-    const data = await this.request.apiKy
+    const data = await this.request
       .get(
         `graphql?variables=(${variables})&queryId=${queryId}&includeWebMeta=true`,
         {
@@ -487,7 +470,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
       limit = LinkedInClient.MAX_UPDATE_COUNT
     } = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions
 
-    const res = await this.request.apiKy
+    const res = await this.request
       .get('feed/updates', {
         searchParams: {
           profileId: id,
