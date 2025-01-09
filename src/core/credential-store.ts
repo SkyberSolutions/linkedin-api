@@ -3,4 +3,5 @@ export interface CredentialStore {
     set cookies(value: string)
     get email(): string
     get password(): string
+    deleteCookies(): void
 }

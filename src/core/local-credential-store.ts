@@ -28,6 +28,10 @@ export class LocalCredentialStore implements CredentialStore {
         this.config.set('cookies', value)
     }
 
+    deleteCookies(): void {
+        this.config.delete('cookies')
+    }
+
     switchUser(email?: string) {
         const emails = this.getEnvArray('LINKEDIN_EMAILS');
         const passwords = this.getEnvArray('LINKEDIN_PASSWORDS');

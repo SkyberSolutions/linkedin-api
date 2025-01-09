@@ -235,6 +235,8 @@ export class LinkedInAuth implements Auth {
     this._isReauthenticating = true
 
     try {
+      // Clears the existing cookies
+      this.credentialStore.deleteCookies()
 
       await this.authenticate()
 

@@ -69,6 +69,23 @@ export class LinkedInRequest {
 
         beforeRetry: [
           async ({request, options, error, retryCount}) => {
+
+            if (error.name === "TypeError" && error.message === "fetch failed") {
+              if (retryCount === 1) { //Only try re-authentication once
+                try {
+                  logger?.debug(`LinkedInRequest: beforeRetry: TypeError: fetch failed - Attempting Re-authentication`)
+                  await this.reAuthenticateAndUpdateRequest(request)
+                } catch (error: any) { // Failed to re-authenticate - rethrow error to stop retries
+                  logger?.debug(`LinkedInRequest: beforeRetry: Re-authentication failed after 'TypeError: fetch failed'`)
+                  throw error
+                }
+              } else {
+                logger?.debug(`LinkedInRequest: beforeRetry: TypeError: fetch failed, retryCount: ${retryCount}`)
+              }
+            } else {
+              logger?.warn(`LinkedInRequest: beforeRetry: Unhandled error: ${error.name}, ${error.message}`)
+            }
+            
           }
         ],
 
