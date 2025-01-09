@@ -1,5 +1,5 @@
 import { rangeDelay } from 'delay'
-import defaultKy, { Options, ResponsePromise, type KyInstance } from 'ky'
+import defaultKy, { KyRequest, KyResponse, Options, ResponsePromise, type KyInstance } from 'ky'
 import pThrottle from 'p-throttle'
 import { Logger } from "../utils/logger/logger.js"
 import { Auth } from './auth.js'
@@ -67,6 +67,11 @@ export class LinkedInRequest {
           ...(throttle ? [defaultThrottle(() => Promise.resolve(undefined))] : []),
         ],
 
+        beforeRetry: [
+          async ({request, options, error, retryCount}) => {
+          }
+        ],
+
         afterResponse: [
           async (request, _options, response) => {
             // this.logger?.debug(`LinkedInRequest: Response: ${JSON.stringify(response, null, 2)}`)
@@ -82,21 +87,9 @@ export class LinkedInRequest {
                     // responseHeaders: Object.fromEntries(response.headers.entries())
                   }
                 )
-
                 try {
-                  assert(this.auth, "LinkedInRequest: Client not defined")
-                  const headers = await this.auth.reAuthenticate()
-                  if (headers) {
-                    // Update the failed request after successfully re-authenticating.
-                    request.headers.set('csrf-token', headers['csrf-token'])
-                    request.headers.set('cookie', headers.cookie)
-                  } else {
-                    return response
-                  }
-                } catch (err: any) {
-                  this.logger?.warn(
-                    `LinkedInRequest: auth error ${response.status} from request ${request.method} ${request.url} error re-authenticating: ${err.message}`
-                  )
+                  await this.reAuthenticateAndUpdateRequest(request)
+                } catch (err: any) { // Failed to re-authenticate - just return what we've got
                   return response
                 }
 
@@ -118,6 +111,25 @@ export class LinkedInRequest {
         ]
       }
     })
+  }
+
+  private async reAuthenticateAndUpdateRequest(request: KyRequest) {
+    try {
+      assert(this.auth, "LinkedInRequest: Client not defined")
+      const headers = await this.auth.reAuthenticate()
+      if (headers) {
+        // Update the failed request after successfully re-authenticating.
+        request.headers.set('csrf-token', headers['csrf-token'])
+        request.headers.set('cookie', headers.cookie)
+      } else {
+        throw new Error('Failed to Re-Authenticate')
+      }
+    } catch (error: any) {
+      this.logger?.warn(
+        `LinkedInRequest: auth error from request ${request.method} ${request.url} error re-authenticating: ${error.message}`
+      )
+      throw error
+    }
   }
 
   get(path: string, options: Options = {}): ResponsePromise {
