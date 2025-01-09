@@ -8,11 +8,7 @@ import { SchoolRequest } from '../requests/school.request.js'
 import { JobRequest } from '../requests/job.request.js'
 import { SearchRequest } from '../requests/search.request.js'
 import type { Auth } from './auth.js'
-
-export interface Client {
-  updateApiKyHeaders(csrfToken: string, encodedCookies: string): void
-  reAuthenticateAndSetHeaders(): Promise<{ 'csrf-token': string, 'cookie': string } | null>
-}
+import { Client } from './client.js'
 
 export class LinkedInClient implements Client {
   // max seems to be 100 posts per page (currently unused)
@@ -92,12 +88,8 @@ export class LinkedInClient implements Client {
     return this.auth.ensureAuthenticated()
   }
 
-  updateApiKyHeaders(csrfToken: string, encodedCookies: string) {
-    this.request.updateApiKyHeaders(csrfToken, encodedCookies)
-  }
-
-  async reAuthenticateAndSetHeaders(): Promise<{ 'csrf-token': string, 'cookie': string } | null> {
-    return this.auth.reAuthenticateAndSetHeaders()
+  updateAuthHeaders(csrfToken: string, encodedCookies: string) {
+    this.request.updateAuthHeaders(csrfToken, encodedCookies)
   }
 
   

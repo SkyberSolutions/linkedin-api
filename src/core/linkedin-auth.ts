@@ -4,8 +4,8 @@ import defaultKy, { type KyInstance } from 'ky'
 
 import { assert, encodeCookies, getConfigForUser, getEnv } from '../utils/index.js'
 import { Logger } from '../utils/logger/logger.js'
-import { Client } from './linkedin-client.js'
 import type { Auth } from './auth.js'
+import { Client } from './client.js'
 
 export class LinkedInAuth implements Auth {
   // max seems to be 100 posts per page (currently unused)
@@ -174,7 +174,7 @@ export class LinkedInAuth implements Auth {
     })
 
     assert(this.client, "LinkedInAuth: Client not defined")
-    this.client.updateApiKyHeaders(csrfToken, encodedCookies)
+    this.client.updateAuthHeaders(csrfToken, encodedCookies)
     return this._cookies
   }
 
@@ -236,7 +236,7 @@ export class LinkedInAuth implements Auth {
   }
 
   /** Returns null if can't reauthenticate because authentication already in progress */
-  async reAuthenticateAndSetHeaders(): Promise<{ 'csrf-token': string, 'cookie': string } | null> {
+  async reAuthenticate(): Promise<{ 'csrf-token': string, 'cookie': string } | null> {
     this._isAuthenticated = false
 
     if (this._isAuthenticating || this._isReauthenticating) {

@@ -2,7 +2,6 @@ import { rangeDelay } from 'delay'
 import defaultKy, { Options, ResponsePromise, type KyInstance } from 'ky'
 import pThrottle from 'p-throttle'
 import { Logger } from "../utils/logger/logger.js"
-import { Client } from './linkedin-client.js'
 import { Auth } from './auth.js'
 
 // Allow up to 1 request per second by default.
@@ -86,7 +85,7 @@ export class LinkedInRequest {
 
                 try {
                   assert(this.auth, "LinkedInRequest: Client not defined")
-                  const headers = await this.auth.reAuthenticateAndSetHeaders()
+                  const headers = await this.auth.reAuthenticate()
                   if (headers) {
                     // Update the failed request after successfully re-authenticating.
                     request.headers.set('csrf-token', headers['csrf-token'])
@@ -125,7 +124,7 @@ export class LinkedInRequest {
     return this._apiKy.get(path, options);
   }
 
-  updateApiKyHeaders(csrfToken: string, encodedCookies: string) {
+  updateAuthHeaders(csrfToken: string, encodedCookies: string) {
 
     // Update apiKy instance headers
     this._apiKy = this._apiKy.extend({
