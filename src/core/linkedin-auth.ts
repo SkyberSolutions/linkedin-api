@@ -2,10 +2,12 @@ import type Conf from 'conf'
 import { parseSetCookie, type SetCookie, splitSetCookieString } from 'cookie-es'
 import defaultKy, { type KyInstance } from 'ky'
 
-import { assert, encodeCookies, getConfigForUser, getEnv } from '../utils/index.js'
 import { Logger } from '../utils/logger/logger.js'
 import type { Auth } from './auth.js'
 import { Client } from './client.js'
+import { encodeCookies } from '../utils/index.js'
+import { LocalCredentialStore } from './local-credential-store.js'
+import { CredentialStore } from './credential-store.js'
 
 export class LinkedInAuth implements Auth {
   // max seems to be 100 posts per page (currently unused)
@@ -20,13 +22,10 @@ export class LinkedInAuth implements Auth {
   // very conservative max requests count to avoid rate-limit
   static readonly MAX_REPEATED_REQUESTS = 200
 
-  public readonly email: string
-  public readonly password: string
-  public readonly config: Conf
-
   protected authKy: KyInstance
   protected logger?: Logger
   private client?: Client
+  private credentialStore: CredentialStore
 
   protected _cookies?: Record<string, SetCookie>
   protected _sessionId?: string
@@ -36,38 +35,27 @@ export class LinkedInAuth implements Auth {
 
   constructor({
     client,
-    email = getEnv('LINKEDIN_EMAIL'),
-    password = getEnv('LINKEDIN_PASSWORD'),
+    credentialStore = new LocalCredentialStore(),
     baseUrl = 'https://www.linkedin.com',
     ky = defaultKy,
     logger = undefined,
     authHeaders = {}
   }: {
     client?: Client,
-    email?: string
-    password?: string
+    credentialStore?: CredentialStore,
     baseUrl?: string
     ky?: KyInstance
     logger?: Logger
     authHeaders?: Record<string, string>
   } = {}) {
     assert(
-      email,
-      'LinkedInAuth missing required "email" (defaults to "LINKEDIN_EMAIL")'
+      credentialStore,
+      'LinkedInAuth missing required "credentialStore"'
     )
-    assert(
-      password,
-      'LinkedInAuth missing required "password" (defaults to "LINKEDIN_PASSWORD")'
-    )
-
-    this.email = email
-    this.password = password
+    this.credentialStore = credentialStore
     this.client = client
     this.logger = logger
 
-    this.config = getConfigForUser(email)
-    this.logger?.debug('LinkedInAuth: Constructor: ConfigForUser: ', JSON.stringify(this.config, null, 2))
-    
     this.authKy = ky.extend({
       prefixUrl: baseUrl,
       headers: {
@@ -102,7 +90,7 @@ export class LinkedInAuth implements Auth {
       return this._isAuthenticated
     } 
 
-    const setCookies = this.config.get('cookies') as string
+    const setCookies = this.credentialStore.cookies
     if (setCookies) {
       try {
         this._setAuthCookies(setCookies)
@@ -189,8 +177,8 @@ export class LinkedInAuth implements Auth {
 
       const res = await this.authKy.post('uas/authenticate', {
         body: new URLSearchParams({
-          session_key: this.email,
-          session_password: this.password,
+          session_key: this.credentialStore.email,
+          session_password: this.credentialStore.password,
           JSESSIONID: this._sessionId!
         }),
         headers: {
@@ -227,7 +215,7 @@ export class LinkedInAuth implements Auth {
 
       const setCookies = res.headers.get('set-cookie')!
       this._setAuthCookies(setCookies)
-      this.config.set('cookies', setCookies)
+      this.credentialStore.cookies =  setCookies
       this._isAuthenticated = true
     } finally {
       this._isAuthenticating = false
