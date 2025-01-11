@@ -1,5 +1,4 @@
 import type { SetCookie } from 'cookie-es'
-import Conf from 'conf'
 
 export function assert(
   value: unknown,

@@ -8,20 +8,31 @@ export class LocalCredentialStore implements CredentialStore {
     private logger?: Logger
     email!: string
     password!: string
+    private storeName: string
 
     constructor({
         email,
-        logger = undefined
+        logger = undefined,
+        storeName = 'linkedin-api'
     }: {
         email?: string
         logger?: Logger
+        storeName?: string
     } = {}) {
+        assert(
+            storeName,
+            'LocalCredentialStore: storeName not defined'
+        )
+        this.storeName = storeName
+
         this.logger = logger
         this.switchUser(email)
     }
 
     get cookies(): string {
-        return this.config.get('cookies') as string
+        const cookies = this.config.get('cookies') as string
+        this.logger?.debug(`LocalCredentialStore: Cookies from store: ${cookies}`)
+        return cookies
     }
 
     set cookies(value: string) {
@@ -73,7 +84,7 @@ export class LocalCredentialStore implements CredentialStore {
     }
 
     private getConfigForUser(email: string) {
-        return new Conf({ projectName: 'linkedin-api', configName: email })
+        return new Conf({ projectName: this.storeName, configName: email })
     }
 
     private getEnv(name: string): string | undefined {

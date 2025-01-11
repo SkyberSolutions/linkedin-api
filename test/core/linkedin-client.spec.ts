@@ -3,7 +3,6 @@ import 'dotenv/config'
 import ky from 'ky'
 import { LinkedInClient } from '../../src/index.js'
 import { ConsoleLogger } from '../../src/utils/logger/console-logger.js'
-import { writeResponseToFile } from './test-util.js'
 
 describe('LinkedInClient', () => {
   let linkedin: LinkedInClient
