@@ -3,13 +3,11 @@ import { LinkedInRequest } from "../core/linkedin-request.js";
 import type {
   CertificationView,
   CourseView,
-  EducationItem,
   EducationView,
   ExperienceItem,
   HonorView,
   LanguageView,
   OrganizationView,
-  PagedList,
   PagedView,
   PatentView,
   PositionGroupView,
@@ -27,13 +25,11 @@ import {
   getIdFromUrn,
   isLinkedInUrn,
   parseExperienceItem,
-  resolveLinkedVectorImageUrl,
-  stringifyLinkedInDate
 } from '../core/linkedin-utils.js'
 
 import { LinkedInClient } from "../core/linkedin-client.js";
 import { Logger } from "../utils/logger/logger.js";
-import { Auth } from "../core/auth.js";
+import { ProfileParser } from "../parser/profile.parser.js";
 
 // Utility type for the idOrOptions parameter
 type IdOrOptions = string | { id: string; offset?: number; limit?: number };
@@ -41,6 +37,7 @@ type IdOrOptions = string | { id: string; offset?: number; limit?: number };
 export class ProfileRequest {
   private request: LinkedInRequest
   private logger?: Logger
+  private profileParser: ProfileParser = new ProfileParser()
   constructor(request: LinkedInRequest, logger?: Logger) {
     this.request = request
     this.logger = logger
@@ -127,114 +124,9 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
    * @param id The LinkedIn user's public identifier or internal URN ID.
    */
   async getProfile(id: string): Promise<Profile> {
-    const res = await this.getProfileRaw(id)
+    const rawProfile = await this.getProfileRaw(id)
 
-    const { profile, educationView, positionView } = res
-    const miniProfile = profile.miniProfile
-
-    const education: Profile['education'] = this.parseEducationView(educationView)
-
-    const experience: Profile['experience'] = this.parsePositionView(positionView)
-
-    // TODO: add other sections (skills, recommendations, etc.)
-    const result: Profile = {
-      id: getIdFromUrn(res.entityUrn)!,
-      entityUrn: res.entityUrn,
-      firstName: profile.firstName,
-      lastName: profile.lastName,
-      headline: profile.headline,
-      summary: profile.summary,
-      occupation: miniProfile?.occupation,
-      location: profile.locationName,
-      industryName: profile.industryName,
-      industryUrn: profile.industryUrn,
-      publicIdentifier: miniProfile?.publicIdentifier,
-      trackingId: miniProfile?.trackingId,
-      defaultLocale: profile.defaultLocale,
-      backgroundImage: resolveLinkedVectorImageUrl(
-        miniProfile?.backgroundImage
-      ),
-      image: resolveLinkedVectorImageUrl(miniProfile?.picture),
-      education,
-      experience
-    }
-
-    return result
-  }
-
-  parseEducationView(educationView: EducationView | undefined): PagedList<EducationItem> | undefined {
-
-    const education: PagedList<EducationItem> | undefined = educationView
-      ? {
-        paging: {
-          offset: educationView.paging.start,
-          count: educationView.paging.count,
-          total: educationView.paging.total
-        },
-        elements: educationView.elements.map((item) => {
-          const educationItem: EducationItem = {
-            entityUrn: item.entityUrn,
-            schoolName: item.schoolName,
-            degreeName: item.degreeName,
-            fieldOfStudy: item.fieldOfStudy,
-            startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
-            endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
-            school: {
-              name: item.school?.schoolName ?? item.schoolName,
-              entityUrn: item.school?.entityUrn,
-              id: getIdFromUrn(item.school?.entityUrn),
-              active: item.school?.active,
-              logo: resolveLinkedVectorImageUrl(item.school?.logo)
-            }
-          }
-
-          return educationItem
-        })
-      }
-      : undefined
-    return education
-  }
-
-  parsePositionView(positionView: PositionView | undefined): PagedList<ExperienceItem> | undefined {
-
-    const experience: PagedList<ExperienceItem> | undefined = positionView
-      ? {
-        paging: {
-          offset: positionView.paging.start,
-          count: positionView.paging.count,
-          total: positionView.paging.total
-        },
-        elements: positionView.elements.map((item) => {
-          const companyUrn =
-            item.companyUrn ?? item.company?.miniCompany?.entityUrn!
-
-          const experienceItem: ExperienceItem = {
-            entityUrn: item.entityUrn,
-            title: item.title,
-            companyName: item.companyName,
-            description: item.description,
-            location: item.locationName,
-            startDate: stringifyLinkedInDate(item.timePeriod?.startDate),
-            endDate: stringifyLinkedInDate(item.timePeriod?.endDate),
-            company: {
-              entityUrn: companyUrn,
-              id: getIdFromUrn(companyUrn),
-              publicIdentifier: item.company?.miniCompany?.universalName,
-              name: item.company?.miniCompany?.name ?? item.companyName,
-              industry: item.company?.industries?.[0],
-              logo: resolveLinkedVectorImageUrl(
-                item.company?.miniCompany?.logo
-              ),
-              employeeCountRange: item.company?.employeeCountRange
-            }
-          }
-
-          return experienceItem
-        })
-      }
-      : undefined
-
-    return experience
+    return this.profileParser.parseProfile(rawProfile)
   }
 
   /**
