@@ -1,5 +1,4 @@
 import { LinkedInRequest } from "../core/linkedin-request.js";
-import { LinkedInAuth } from '../core/linkedin-auth.js'
 import { LinkedInClient } from "../core/linkedin-client.js";
 
 import type {
@@ -18,12 +17,14 @@ import {
   resolveImageUrl,
 } from '../core/linkedin-utils.js'
 import { assert } from '../utils/index.js'
-import { Auth } from "../core/auth.js";
+import { Logger } from "../utils/logger/logger.js";
 
 export class SearchRequest{
     private request: LinkedInRequest
-    constructor(request: LinkedInRequest) {
+    private logger?: Logger
+    constructor(request: LinkedInRequest, logger?: Logger) {
         this.request = request
+        this.logger = logger
     }
 
   /**
@@ -66,7 +67,8 @@ export class SearchRequest{
       `query:(${keywords}flagshipSearchIntent:SEARCH_SRP,` +
       `queryParameters:${params.filters},includeFiltersInResponse:false))` +
       `&queryId=voyagerSearchDashClusters.bb967969ef89137e6dec45d038310505`
-    // this.logger?.log(uri)
+    
+      this.logger?.log(`SEARCH URI: ${uri}`)
 
     const res = await this.request
       .get(uri, {

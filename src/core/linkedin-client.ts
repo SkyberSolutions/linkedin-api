@@ -35,8 +35,6 @@ export class LinkedInClient implements Client {
   search: SearchRequest
 
   constructor({
-    email,
-    password,
     baseUrl = 'https://www.linkedin.com',
     ky = defaultKy,
     throttle = true,
@@ -58,8 +56,6 @@ export class LinkedInClient implements Client {
 
     this.auth = new LinkedInAuth({
       client: this,
-      email: email,
-      password: password,
       baseUrl: baseUrl,
       ky: ky,
       logger: this.logger,
@@ -78,10 +74,10 @@ export class LinkedInClient implements Client {
     )
 
     this.profile = new ProfileRequest(this.request, this.logger)
-    this.company = new CompanyRequest(this.request)
-    this.school = new SchoolRequest(this.request)
-    this.job = new JobRequest(this.request)
-    this.search = new SearchRequest(this.request)
+    this.company = new CompanyRequest(this.request, this.logger)
+    this.school = new SchoolRequest(this.request, this.logger)
+    this.job = new JobRequest(this.request, this.logger)
+    this.search = new SearchRequest(this.request, this.logger)
   }
 
   async ensureReady() {

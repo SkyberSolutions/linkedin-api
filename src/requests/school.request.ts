@@ -1,6 +1,4 @@
 import { LinkedInRequest } from "../core/linkedin-request.js";
-import { LinkedInAuth } from '../core/linkedin-auth.js'
-import { LinkedInClient } from "../core/linkedin-client.js";
 
 import type {
   Organization,
@@ -12,14 +10,15 @@ import {
   isLinkedInUrn,
   normalizeRawOrganization,
 } from '../core/linkedin-utils.js'
-import { Auth } from "../core/auth.js";
+import { Logger } from "../utils/logger/logger.js";
 
  
 export class SchoolRequest{
     private request: LinkedInRequest
-
-    constructor(request: LinkedInRequest) {
+    private logger?: Logger
+    constructor(request: LinkedInRequest, logger?: Logger) {
         this.request = request
+        this.logger = logger
     }
 
  /**
