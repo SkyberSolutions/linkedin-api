@@ -54,3 +54,14 @@ export async function deleteFilesByExtension(dirPath: string, extension: '.txt' 
       console.error(`An error occurred: ${error}`);
   }
 }
+
+
+export function isValidUrl(url: string | undefined): boolean {
+  if (!url) return false
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
