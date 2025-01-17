@@ -18,10 +18,13 @@ import {
 } from '../core/linkedin-utils.js'
 import { assert } from '../utils/index.js'
 import { Logger } from "../utils/logger/logger.js";
+import { SearchParser } from "../parser/search.parser.js";
 
 export class SearchRequest{
     private request: LinkedInRequest
     private logger?: Logger
+    private searchParser: SearchParser = new SearchParser()
+
     constructor(request: LinkedInRequest, logger?: Logger) {
         this.request = request
         this.logger = logger
@@ -138,9 +141,9 @@ export class SearchRequest{
    * Takes in a google-style search query or an object containing more fine-
    * grained search parameters.
    */
-  async searchPeople(
+  async searchPeopleRaw(
     queryOrParams: string | SearchPeopleParams
-  ): Promise<SearchPeopleResponse> {
+  ): Promise<SearchResponse> {
     const { includePrivateProfiles = true, ...params } =
       typeof queryOrParams === 'string'
         ? { query: queryOrParams }
@@ -220,52 +223,31 @@ export class SearchRequest{
       filters.push(`(key:school,value:List(${params.keywordSchool}))`)
     }
 
-    const res = await this.search({
+    return this.search({
       offset: params.offset,
       limit: params.limit,
       filters: `List(${filters.join(',')})`,
       ...(params.query && { query: params.query })
     })
 
-    const response: SearchPeopleResponse = {
-      paging: res.paging,
-      results: []
-    }
-
-    for (const result of res.results) {
-      if (
-        !includePrivateProfiles &&
-        result.entityCustomTrackingInfo?.memberDistance === 'OUT_OF_NETWORK'
-      ) {
-        continue
-      }
-
-      const urnId = getIdFromUrn(getUrnFromRawUpdate(result.entityUrn))
-      assert(urnId)
-
-      const name = result.title?.text
-      assert(name)
-
-      const url = result.navigationUrl?.split('?')[0]
-      assert(url)
-
-      response.results.push({
-        urnId,
-        name,
-        url,
-        distance: result.entityCustomTrackingInfo?.memberDistance,
-        jobTitle: result.primarySubtitle?.text,
-        location: result.secondarySubtitle?.text,
-        summary: result.summary?.text,
-        image: resolveImageUrl(
-          result.image?.attributes?.[0]?.detailData?.nonEntityProfilePicture
-            ?.vectorImage
-        )
-      })
-    }
-
-    return response
   }
+
+  async searchPeople(
+    queryOrParams: string | SearchPeopleParams
+  ): Promise<SearchPeopleResponse> {
+
+    const { includePrivateProfiles = true, ...params } =
+      typeof queryOrParams === 'string'
+        ? { query: queryOrParams }
+        : queryOrParams
+
+    const res = await this.searchPeopleRaw(params)
+
+    return this.searchParser.parsePeopleSearchResponse(res, includePrivateProfiles)
+
+  }
+
+  
 
   /**
    * Performs a search for companies on LinkedIn.
