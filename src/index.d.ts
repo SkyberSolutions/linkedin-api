@@ -1,3 +1,1 @@
 export * from './core/linkedin-client.js';
-export * from './types/index.js';
-
