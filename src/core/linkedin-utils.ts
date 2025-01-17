@@ -119,7 +119,9 @@ export function getGroupedItemId(item: any): string | undefined {
 }
 
 export function resolveImageUrl(vectorImage?: VectorImage): string | undefined {
-  if (!vectorImage?.rootUrl) return
+  // Sometimes the rootUrl is empty, and the full path is in fileIdentifyingUrlPathSegment
+  //if (!vectorImage?.rootUrl) return
+  if (!vectorImage) return
   if (!vectorImage.artifacts?.length) return
 
   const largestArtifact = vectorImage.artifacts.reduce(
