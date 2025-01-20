@@ -6,4 +6,5 @@ export interface TimePeriod {
   export interface LIDate {
     month?: number
     year?: number
+    day?: number
   }
