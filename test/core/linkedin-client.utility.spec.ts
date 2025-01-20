@@ -7,7 +7,9 @@ import { writeJsonToFile } from './test-util.js'
 
 describe('LinkedInClient', () => {
   let linkedin: LinkedInClient
-  let id = 'chrispawley'
+  // let id = 'chrispawley'
+  let id = 'harry-pentire-555b92343'
+  // let id = 'christopher-tuck-52608737'
   //let id = 'ACoAAAyzwfMBFQDk2KohwcQbrShKZf49BQJCdnw' // id for chris-pawley
   //let id = 'fisch2'
   //let id = 'ACoAAAdVCacB9uO3u3vDtvGPnDQeweefI2nV0gw' // id for fitch2
@@ -30,9 +32,14 @@ describe('LinkedInClient', () => {
     await writeJsonToFile(res, `./test/example/profile/profile-raw-${id}.json`);
   }, 30_000)
 
-  it("SAVE: getProfileRaw(id) with fullProfile==true", async () => {
-    const res = await linkedin.profile.getProfileRaw('chrispawley', true)
-    await writeJsonToFile(res, `./test/example/profile/profile-raw-full-${id}.json`);
+  it("SAVE: getProfileView(id)", async () => {
+    const res = await linkedin.profile.getProfileView(id)
+    await writeJsonToFile(res, `./test/example/profile/profile-view-${id}.json`);
+  }, 30_000)
+
+  it("SAVE: getProfileView(id) with fullProfile==true", async () => {
+    const res = await linkedin.profile.getProfileView('chrispawley', true)
+    await writeJsonToFile(res, `./test/example/profile/profile-view-full-${id}.json`);
   }, 30_000)
 
   it("SAVE: getProfilePositions(id)", async () => {

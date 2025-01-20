@@ -30,6 +30,7 @@ import {
 import { LinkedInClient } from "../core/linkedin-client.js";
 import { Logger } from "../utils/logger/logger.js";
 import { ProfileParser } from "../parser/profile.parser.js";
+import { ResponsePromise } from "ky";
 
 // Utility type for the idOrOptions parameter
 type IdOrOptions = string | { id: string; offset?: number; limit?: number };
@@ -52,16 +53,30 @@ export class ProfileRequest {
     return res.json<SelfProfile>()
   }
 
+  
+  async getProfileRaw(id: string, fullProfile: boolean = false): Promise<unknown> {
+    if (isLinkedInUrn(id)) {
+      id = getIdFromUrn(id)!
+    }
+
+    // NOTE: the `/profileView` sub-route returns more detailed data.
+    const raw = await this.request
+      .get(`identity/profiles/${id}/profileView`)
+      .json()
+      return raw
+  }
+  
+
   /**
    * Fetches basic profile information for a given LinkedIn user.
    *
-   * Returns the raw data from the LinkedIn API without normalizing it.
+   * Returns the ProfileView data from the LinkedIn API without normalizing it.
    *
    * @param id The LinkedIn user's public identifier or internal URN ID.
    * @param fullProfile Check all items are contained in PagedLists
    * and re-fetch full list if needed
    */
-  async getProfileRaw(id: string, fullProfile: boolean = false): Promise<ProfileView> {
+  async getProfileView(id: string, fullProfile: boolean = false): Promise<ProfileView> {
     if (isLinkedInUrn(id)) {
       id = getIdFromUrn(id)!
     }
@@ -77,8 +92,6 @@ export class ProfileRequest {
 
       
       profileView.positionView = await this.updateIfNeeded(profileView.positionView, 'PositionView', id, this.getProfilePositions.bind(this))
-
-      
 
       profileView.patentView = await this.updateIfNeeded(profileView.patentView, 'PatentView', id, this.getProfilePatents.bind(this))
 
@@ -124,9 +137,9 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
    * @param id The LinkedIn user's public identifier or internal URN ID.
    */
   async getProfile(id: string): Promise<Profile> {
-    const rawProfile = await this.getProfileRaw(id)
+    const profileView = await this.getProfileView(id)
 
-    return this.profileParser.parseProfile(rawProfile)
+    return this.profileParser.parseProfile(profileView)
   }
 
   /**
