@@ -395,12 +395,13 @@ export interface ExperienceItem {
 
 export interface ProfileContactInfo {
   entityUrn: string
+  address?: string
 
   websites?: {
     type: Record<
-      string,
+      "com.linkedin.voyager.identity.profile.StandardWebsite" | string,
       {
-        category: string
+        category: "PERSONAL" | "COMPANY" | "BLOG" | string
       }
     >
     url: string
@@ -411,10 +412,20 @@ export interface ProfileContactInfo {
     credentialId: string
   }[]
 
-  emailAddress?: any[]
-  phoneNumbers?: any[]
-  ims?: any[]
-  birthDateOn?: any
+  emailAddress?: string[]
+  phoneNumbers?: {
+    type: "HOME" | "WORK" | "MOBILE",
+    number: string
+  }[]
+  ims?: {
+    provider: "SKYPE" | string,
+    id: string
+  }[]
+  birthdayVisibilitySetting: "LINKEDIN_USER" | string,
+  birthDateOn?: {
+    month: number
+    day: number
+  }
 }
 
 export interface ProfileSkills {

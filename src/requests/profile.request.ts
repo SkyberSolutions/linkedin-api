@@ -33,7 +33,12 @@ import { ProfileParser } from "../parser/profile.parser.js";
 import { ResponsePromise } from "ky";
 
 // Utility type for the idOrOptions parameter
-type IdOrOptions = string | { id: string; offset?: number; limit?: number };
+type IdOrOptions = string | {
+   id: string; 
+   offset?: number; 
+   limit?: number
+   q?: string // "received" when fetching recommendations
+   };
 
 export class ProfileRequest {
   private request: LinkedInRequest
@@ -90,7 +95,8 @@ export class ProfileRequest {
 
       profileView.skillView = await this.updateIfNeeded(profileView.skillView, 'SkillView', id, this.getProfileSkills.bind(this))
 
-      
+      profileView.positionGroupView = await this.updateIfNeeded(profileView.positionGroupView, 'PositionGroupView', id, this.getProfilePositionGroups.bind(this))
+    
       profileView.positionView = await this.updateIfNeeded(profileView.positionView, 'PositionView', id, this.getProfilePositions.bind(this))
 
       profileView.patentView = await this.updateIfNeeded(profileView.patentView, 'PatentView', id, this.getProfilePatents.bind(this))
@@ -155,8 +161,20 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
       .json<ProfileContactInfo>()
   }
 
+  /**
+   * Recommendations you receive are only visible to 1st, 2nd, and 3rd-degree connections:
+   * REFERENCE: https://www.linkedin.com/help/linkedin/answer/a544830/visibility-of-recommendations-on-your-profile
+   * 
+   */
+  async getProfileRecommendations(idOrOptions: IdOrOptions): Promise<unknown> {
+    
+    const options = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions;
+    // Required for fetching 'recommendations' otherwise fails with '400 Bad request'
+    // Reference: https://github.com/jarivas/linkedin-exporter/blob/master/src/linkedIn.js#L321
+    options.q = "received"
 
-
+    return this.getProfileData(options, 'recommendations');
+  }
 
   /**
    * * Fetch SkillView (paged positions) in the same format as getProfile.
@@ -170,6 +188,13 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
    */
   async getProfilePositions(idOrOptions: IdOrOptions): Promise<PositionView> {
     return this.getProfileData(idOrOptions, 'positions');
+  }
+
+   /**
+   * * Fetch PositionView (paged positions) in the same format as getProfile.
+   */
+   async getProfilePositionGroups(idOrOptions: IdOrOptions): Promise<PositionGroupView> {
+    return this.getProfileData(idOrOptions, 'positionGroups');
   }
 
   /**
@@ -237,6 +262,8 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
   }
 
 
+// q: "received"
+
   /**
      * * Generic function to fetch profile data.
      * TODO: Split requests if limit too high?
@@ -248,48 +275,28 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
     const {
       id,
       offset = 0,
-      limit = 100
+      limit = 100,
+      q,
     } = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions;
 
     const resolvedId = isLinkedInUrn(id) ? getIdFromUrn(id)! : id;
 
+    const searchParams: Record<string, any> = {
+      count: limit,
+      start: offset,
+  };
+
+  if (q !== undefined) {
+      searchParams.q = q; // Include `q` in searchParams only if it's defined
+  }
+
+
     return this.request
       .get(`identity/profiles/${resolvedId}/${apiPath}`, {
-        searchParams: {
-          count: limit,
-          start: offset
-        }
+        searchParams: searchParams,
       })
       .json<T>();
   }
-
-  /**
-   * * Fetch PositionView (paged positions) in the same format as getProfile.
-   *
-   * @param id The target LinkedIn user's public identifier or internal URN ID.
-   */
-  async getProfilePositionGroups(
-    idOrOptions: string | { id: string; offset?: number; limit?: number }
-  ) {
-    const {
-      id,
-      offset = 0,
-      limit = 100
-    } = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions
-
-    const resolvedId = isLinkedInUrn(id) ? getIdFromUrn(id)! : id
-
-    return this.request
-      .get(`identity/profiles/${resolvedId}/positionGroups`, {
-        searchParams: {
-          count: limit,
-          start: offset
-        }
-      })
-      .json<PositionGroupView>()
-  }
-
-
 
   /**
    * @param urnId The target LinkedIn user's internal URN ID.

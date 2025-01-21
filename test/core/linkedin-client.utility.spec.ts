@@ -7,8 +7,8 @@ import { writeJsonToFile } from './test-util.js'
 
 describe('LinkedInClient', () => {
   let linkedin: LinkedInClient
-  // let id = 'chrispawley'
-  let id = 'harry-pentire-555b92343'
+  let id = 'chrispawley'
+  //let id = 'harry-pentire-555b92343'
   // let id = 'christopher-tuck-52608737'
   //let id = 'ACoAAAyzwfMBFQDk2KohwcQbrShKZf49BQJCdnw' // id for chris-pawley
   //let id = 'fisch2'
@@ -62,6 +62,11 @@ describe('LinkedInClient', () => {
     await writeJsonToFile(res, `./test/example/profile/profile-education-${id}.json`);
   }, 30_000)
 
+  it("SAVE: getProfileRecommendations(id)", async () => {
+    const res = await linkedin.profile.getProfileRecommendations(id)
+    await writeJsonToFile(res, `./test/example/profile/profile-recommendations-${id}.json`);
+  }, 30_000)
+
   it("SAVE: getProfileSkills(id)", async () => {
     const res = await linkedin.profile.getProfileSkills(id)
     await writeJsonToFile(res, `./test/example/profile/profile-skills-${id}.json`);
@@ -100,6 +105,11 @@ describe('LinkedInClient', () => {
   it("SAVE: getProfilePublications(id)", async () => {
     const res = await linkedin.profile.getProfilePublications(id)
     await writeJsonToFile(res, `./test/example/profile/profile-publications-${id}.json`);
+  }, 30_000)
+
+  it("SAVE: getProfileContactInfo(id)", async () => {
+    const res = await linkedin.profile.getProfileContactInfo(id)
+    await writeJsonToFile(res, `./test/example/profile/profile-contact-info-${id}.json`);
   }, 30_000)
 
 

@@ -91,7 +91,7 @@ export class LinkedInRequest {
 
         afterResponse: [
           async (request, _options, response) => {
-            // this.logger?.debug(`LinkedInRequest: Response: ${JSON.stringify(response, null, 2)}`)
+            this.logger?.debug(`Request: ${request.url}`)
             try {
               // Attempt to automatically re-authenticate after receiving an auth error.
               if (response.status === 403 || response.status === 401) {
@@ -152,7 +152,7 @@ export class LinkedInRequest {
   get(path: string, options: Options = {}): ResponsePromise {
     return this._apiKy.get(path, options);
   }
-
+  
   updateAuthHeaders(csrfToken: string, encodedCookies: string) {
 
     // Update apiKy instance headers
