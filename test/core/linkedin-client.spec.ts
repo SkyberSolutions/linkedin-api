@@ -36,8 +36,8 @@ describe('LinkedInClient', () => {
   }, 30_000)
 
  
-  it("getProfileRaw('chrispawley') with fetchMissingItems", async () => {
-    const res = await linkedin.profile.getProfileRaw('chrispawley', true)
+  it("getProfileRaw('chrispawley') with fullProfile=true", async () => {
+    const res = await linkedin.profile.getProfileView('chrispawley', {fullProfile: true})
 
     //expect(res.positionGroupView.paging.count).toEqual(res.positionGroupView.paging.total)
     expect(res.patentView.paging.count).toEqual(res.patentView.paging.total)

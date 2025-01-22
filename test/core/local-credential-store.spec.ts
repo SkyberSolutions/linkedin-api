@@ -9,8 +9,8 @@ describe('LocalCredentialStore', () => {
     let initialEmail: string
     let mockEmails: string[]
     let mockPasswords: string[]
-    const cookie_path_1 = `./test/example/cookie/cookies-harry-pentire-250330-1028.json`
-    const cookie_path_2 = `./test/example/cookie/cookies-harry-pentire-250331-1611.json`
+    const cookie_path_1 = `./example/cookie/cookies-harry-pentire-250330-1028.json`
+    const cookie_path_2 = `./example/cookie/cookies-harry-pentire-250331-1611.json`
     
     beforeAll(async () => {
         const storeName = 'TEST-linkedin-api'

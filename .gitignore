@@ -3,4 +3,5 @@ dist
 coverage
 node_modules
 .env
-test/example/cookie
+test/example
+example

@@ -1,4 +1,3 @@
-
 import 'dotenv/config'
 import ky from 'ky'
 import { LinkedInClient } from '../../src/index.js'
@@ -23,13 +22,13 @@ describe('SearchRequest', () => {
 
   it("searchPeopleByTitle-Raw", async () => {
     const res = await linkedin.search.searchPeopleRaw('Chris Pawley')
-    await writeJsonToFile(res, `./test/example/search/people-search-raw-title-chris_pawley.json`);
+    await writeJsonToFile(res, `./example/search/people-search-raw-title-chris_pawley.json`);
 
   }, 30_000)
 
   it("searchPeopleByTitle", async () => {
     const res = await linkedin.search.searchPeople('Chris Pawley')
-    await writeJsonToFile(res, `./test/example/search/people-search-title-chris_pawley.json`);
+    await writeJsonToFile(res, `./example/search/people-search-title-chris_pawley.json`);
 
   }, 30_000)
 
