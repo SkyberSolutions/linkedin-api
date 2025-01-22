@@ -38,8 +38,13 @@ describe('LinkedInClient', () => {
   }, 30_000)
 
   it("SAVE: getProfileView(id) with fullProfile==true", async () => {
-    const res = await linkedin.profile.getProfileView('chrispawley', true)
+    const res = await linkedin.profile.getProfileView('chrispawley', {fullProfile: true})
     await writeJsonToFile(res, `./test/example/profile/profile-view-full-${id}.json`);
+  }, 30_000)
+
+  it("SAVE: getProfileView(id) with recommendations==true", async () => {
+    const res = await linkedin.profile.getProfileView('chrispawley', {recommendations: true})
+    await writeJsonToFile(res, `./test/example/profile/profile-view-with-recommendations-${id}.json`);
   }, 30_000)
 
   it("SAVE: getProfilePositions(id)", async () => {

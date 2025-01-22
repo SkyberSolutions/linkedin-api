@@ -26,6 +26,7 @@ export interface ProfileView {
   volunteerExperienceView: VolunteerExperienceView
   primaryLocale: PrimaryLocale
   publicationView: PublicationView
+  recommendationView?: RecommendationView
 }
 
 export interface PositionGroupView {
@@ -334,6 +335,30 @@ export interface PublicationView {
   elements: PublicationViewItem[]
 }
 
+export interface RecommendationViewItem {
+    dashEntityUrn: string
+    entityUrn: string
+    created: number,
+    recommendee: MiniProfile
+    recommendationText: string
+    recommendeeEntity: string
+    recommenderEntity: string
+    visibilityOnRecommenderProfile: "EVERYONE" | string
+    lastModified: number,
+    relationship: "WORKED_IN_SAME_GROUP" | "RECOMMENDER_MANAGED_RECOMMENDEE" | string
+    recommender: MiniProfile
+    status: "VISIBLE" | string
+}
+
+export interface RecommendationView {
+  metadata?: {
+    numVisible: number
+  },
+  elements: RecommendationViewItem[]
+  paging?: Paging
+  data?: DataView
+}
+
 export interface Profile {
   entityUrn: string
   id: string
@@ -448,3 +473,23 @@ export interface Element {
   timePeriod?: TimePeriod
   miniCompany?: MiniCompany
 }
+
+export interface ErrorView {
+    path: string[],
+    locations: string[],
+    extensions: {
+      classification: "DataFetchingException" | string
+      exceptionClass: "com.linkedin.voyager.common.VoyagerUserVisibleException" | string
+      status: 403 | number
+    },
+    message: string
+}
+
+export interface DataView {
+    data: {
+      identityDashProfileComponentsBySectionType: string | null,
+      $recipeTypes: string[],
+      $type: string
+    },
+    errors: ErrorView[]
+  }

@@ -16,6 +16,7 @@ import type {
   ProfileContactInfo,
   ProfileView,
   PublicationView,
+  RecommendationView,
   SelfProfile,
   SkillView,
   TestScoreView
@@ -81,7 +82,7 @@ export class ProfileRequest {
    * @param fullProfile Check all items are contained in PagedLists
    * and re-fetch full list if needed
    */
-  async getProfileView(id: string, fullProfile: boolean = false): Promise<ProfileView> {
+  async getProfileView(id: string, options?: {fullProfile?: boolean, recommendations?: boolean}): Promise<ProfileView> {
     if (isLinkedInUrn(id)) {
       id = getIdFromUrn(id)!
     }
@@ -91,7 +92,7 @@ export class ProfileRequest {
       .get(`identity/profiles/${id}/profileView`)
       .json<ProfileView>()
 
-    if (fullProfile) {
+    if (options?.fullProfile) {
 
       profileView.skillView = await this.updateIfNeeded(profileView.skillView, 'SkillView', id, this.getProfileSkills.bind(this))
 
@@ -118,6 +119,10 @@ export class ProfileRequest {
       profileView.publicationView = await this.updateIfNeeded(profileView.publicationView, 'PublicationView', id, this.getProfilePublications.bind(this))
 
     }
+    if (options?.recommendations) {
+      profileView.recommendationView = await this.getProfileRecommendations(id)
+    }
+
     return profileView
   }
 
@@ -166,14 +171,26 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
    * REFERENCE: https://www.linkedin.com/help/linkedin/answer/a544830/visibility-of-recommendations-on-your-profile
    * 
    */
-  async getProfileRecommendations(idOrOptions: IdOrOptions): Promise<unknown> {
+  async getProfileRecommendations(idOrOptions: IdOrOptions): Promise<RecommendationView> {
     
     const options = typeof idOrOptions === 'string' ? { id: idOrOptions } : idOrOptions;
     // Required for fetching 'recommendations' otherwise fails with '400 Bad request'
     // Reference: https://github.com/jarivas/linkedin-exporter/blob/master/src/linkedIn.js#L321
     options.q = "received"
 
-    return this.getProfileData(options, 'recommendations');
+    const {data, ...other} = await this.getProfileData(options, 'recommendations') as RecommendationView;
+
+    if (data) {
+      // Will return "com.linkedin.voyager.common.VoyagerUserVisibleException"
+      // if this is not a 1st, 2nd, and 3rd-degree connections
+      const errorMessage = data.errors[0]?.message
+      this.logger?.warn(
+        `Error fetching recommendations: ${errorMessage},
+         ${JSON.stringify(data, null, 2)}`
+        )
+    } 
+
+    return other
   }
 
   /**
