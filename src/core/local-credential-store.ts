@@ -1,7 +1,6 @@
-import { CredentialStore } from "./credential-store.js";
-import type { SetCookie } from 'cookie-es'
+import type { CredentialStore } from "./credential-store.js";
 import Conf from 'conf'
-import { Logger } from "../utils/logger/logger.js";
+import type { Logger } from "../utils/logger/logger.js";
 
 export class LocalCredentialStore implements CredentialStore {
     config!: Conf

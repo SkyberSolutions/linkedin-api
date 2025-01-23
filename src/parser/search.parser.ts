@@ -1,5 +1,5 @@
 import { getIdFromUrn, getUrnFromRawUpdate, resolveImageUrl } from "../core/linkedin-utils.js"
-import { SearchPeopleResponse, SearchResponse } from "../types/search.type.js"
+import type { SearchPeopleResponse, SearchResponse } from "../types/search.type.js"
 
 export class SearchParser {
 

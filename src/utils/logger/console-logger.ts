@@ -1,4 +1,5 @@
-import { Logger, LogLevel } from "./logger.js";
+import type { Logger } from "./logger.js";
+import { LogLevel } from "./logger.js";
 
 export class ConsoleLogger implements Logger {
     private _logLevel: LogLevel = LogLevel.Debug; // Default log level

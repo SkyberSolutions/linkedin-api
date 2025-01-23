@@ -29,9 +29,9 @@ import {
 } from '../core/linkedin-utils.js'
 
 import { LinkedInClient } from "../core/linkedin-client.js";
-import { Logger } from "../utils/logger/logger.js";
+import type { Logger } from "../utils/logger/logger.js";
 import { ProfileParser } from "../parser/profile.parser.js";
-import { ResponsePromise } from "ky";
+
 
 // Utility type for the idOrOptions parameter
 type IdOrOptions = string | {

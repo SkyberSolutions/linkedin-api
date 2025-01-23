@@ -1,9 +1,9 @@
-import { Company, EmployeeCountRange, MiniCompany } from "./company.type.js"
-import { LIDate, TimePeriod } from "./date.type.js"
-import { LinkedVectorImage } from "./image.type.js"
-import { DefaultLocale, SupportedLocale } from "./locale.type.js"
-import { GeoLocation, Location } from "./location.type.js"
-import { PagedList, Paging } from "./paging.type.js"
+import type { Company, EmployeeCountRange, MiniCompany } from "./company.type.js"
+import type { LIDate, TimePeriod } from "./date.type.js"
+import type { LinkedVectorImage } from "./image.type.js"
+import type { DefaultLocale, SupportedLocale } from "./locale.type.js"
+import type { GeoLocation, Location } from "./location.type.js"
+import type { PagedList, Paging } from "./paging.type.js"
 
 export interface ProfileView {
   entityUrn: string

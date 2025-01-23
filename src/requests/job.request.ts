@@ -4,7 +4,7 @@ import {
   getIdFromUrn,
   isLinkedInUrn
 } from '../core/linkedin-utils.js'
-import { Logger } from "../utils/logger/logger.js";
+import type { Logger } from "../utils/logger/logger.js";
  
 export class JobRequest{
     private request: LinkedInRequest

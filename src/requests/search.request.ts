@@ -17,7 +17,7 @@ import {
   resolveImageUrl,
 } from '../core/linkedin-utils.js'
 import { assert } from '../utils/index.js'
-import { Logger } from "../utils/logger/logger.js";
+import type { Logger } from "../utils/logger/logger.js";
 import { SearchParser } from "../parser/search.parser.js";
 
 export class SearchRequest{

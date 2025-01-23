@@ -1,4 +1,4 @@
-import { PagingResponse } from "./paging.type.js"
+import type { PagingResponse } from "./paging.type.js"
 
 export type NetworkDepth = 'F' | 'S' | 'O'
 

@@ -1,6 +1,6 @@
 import defaultKy, { type KyInstance } from 'ky'
 import { LinkedInAuth } from './linkedin-auth.js'
-import { Logger } from '../utils/logger/logger.js'
+import type { Logger } from '../utils/logger/logger.js'
 import { LinkedInRequest } from './linkedin-request.js'
 import { ProfileRequest } from '../requests/profile.request.js'
 import { CompanyRequest } from '../requests/company.request.js'
@@ -8,7 +8,7 @@ import { SchoolRequest } from '../requests/school.request.js'
 import { JobRequest } from '../requests/job.request.js'
 import { SearchRequest } from '../requests/search.request.js'
 import type { Auth } from './auth.js'
-import { Client } from './client.js'
+import type { Client } from './client.js'
 
 export class LinkedInClient implements Client {
   // max seems to be 100 posts per page (currently unused)

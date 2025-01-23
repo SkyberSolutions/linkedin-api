@@ -1,6 +1,6 @@
-import { EmployeeCountRange } from "./company.type.js"
-import { FullLocation } from "./location.type.js"
-import { LinkedMediaProcessorImage, LinkedVectorImage } from "./image.type.js"
+import type { EmployeeCountRange } from "./company.type.js"
+import type { FullLocation } from "./location.type.js"
+import type { LinkedMediaProcessorImage, LinkedVectorImage } from "./image.type.js"
 
 /** School or Company */
 export interface RawOrganization {

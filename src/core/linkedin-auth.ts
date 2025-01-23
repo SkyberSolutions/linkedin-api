@@ -2,12 +2,12 @@ import type Conf from 'conf'
 import { parseSetCookie, type SetCookie, splitSetCookieString } from 'cookie-es'
 import defaultKy, { type KyInstance } from 'ky'
 
-import { Logger } from '../utils/logger/logger.js'
+import type { Logger } from '../utils/logger/logger.js'
 import type { Auth } from './auth.js'
-import { Client } from './client.js'
+import type { Client } from './client.js'
 import { encodeCookies } from '../utils/index.js'
 import { LocalCredentialStore } from './local-credential-store.js'
-import { CredentialStore } from './credential-store.js'
+import type { CredentialStore } from './credential-store.js'
 
 export class LinkedInAuth implements Auth {
   // max seems to be 100 posts per page (currently unused)

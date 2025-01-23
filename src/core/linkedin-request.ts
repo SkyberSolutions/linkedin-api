@@ -1,8 +1,9 @@
 import { rangeDelay } from 'delay'
-import defaultKy, { KyRequest, KyResponse, Options, ResponsePromise, type KyInstance } from 'ky'
+import defaultKy from 'ky'
+import type { KyRequest, Options, ResponsePromise, KyInstance } from 'ky'
 import pThrottle from 'p-throttle'
-import { Logger } from "../utils/logger/logger.js"
-import { Auth } from './auth.js'
+import type { Logger } from "../utils/logger/logger.js"
+import type { Auth } from './auth.js'
 
 // Allow up to 1 request per second by default.
 const defaultThrottle = pThrottle({

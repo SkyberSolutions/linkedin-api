@@ -1,4 +1,4 @@
-import { LinkedVectorImage } from "./image.type.js"
+import type { LinkedVectorImage } from "./image.type.js"
 
 export interface Company {
     miniCompany: MiniCompany

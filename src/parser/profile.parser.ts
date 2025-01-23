@@ -1,6 +1,6 @@
 import { getIdFromUrn, resolveLinkedVectorImageUrl, stringifyLinkedInDate } from "../core/linkedin-utils.js"
-import { PagedList } from "../types/index.js"
-import { EducationItem, EducationView, ExperienceItem, PositionView, Profile, ProfileView } from "../types/profile.type.js"
+import type { PagedList } from "../types/index.js"
+import type { EducationItem, EducationView, ExperienceItem, PositionView, Profile, ProfileView } from "../types/profile.type.js"
 
 export class ProfileParser {
 
