@@ -30,7 +30,7 @@ import {
 
 import { LinkedInClient } from "../core/linkedin-client.js";
 import type { Logger } from "../utils/logger/logger.js";
-import { ProfileParser } from "../parser/profile.parser.js";
+import { ProfileTransformer } from "../transformer/profile.transformer.js";
 
 
 // Utility type for the idOrOptions parameter
@@ -44,7 +44,7 @@ type IdOrOptions = string | {
 export class ProfileRequest {
   private request: LinkedInRequest
   private logger?: Logger
-  private profileParser: ProfileParser = new ProfileParser()
+  private profileTransformer: ProfileTransformer = new ProfileTransformer()
   constructor(request: LinkedInRequest, logger?: Logger) {
     this.request = request
     this.logger = logger
@@ -150,7 +150,7 @@ private async updateIfNeeded<U, T extends PagedView<U>>(currentView: T, viewName
   async getProfile(id: string): Promise<Profile> {
     const profileView = await this.getProfileView(id)
 
-    return this.profileParser.parseProfile(profileView)
+    return this.profileTransformer.transformProfile(profileView)
   }
 
   /**

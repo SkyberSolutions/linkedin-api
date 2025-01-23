@@ -18,12 +18,12 @@ import {
 } from '../core/linkedin-utils.js'
 import { assert } from '../utils/index.js'
 import type { Logger } from "../utils/logger/logger.js";
-import { SearchParser } from "../parser/search.parser.js";
+import { SearchTransformer } from "../transformer/search.transformer.js";
 
 export class SearchRequest{
     private request: LinkedInRequest
     private logger?: Logger
-    private searchParser: SearchParser = new SearchParser()
+    private searchTransformer: SearchTransformer = new SearchTransformer()
 
     constructor(request: LinkedInRequest, logger?: Logger) {
         this.request = request
@@ -243,7 +243,7 @@ export class SearchRequest{
 
     const res = await this.searchPeopleRaw(params)
 
-    return this.searchParser.parsePeopleSearchResponse(res, includePrivateProfiles)
+    return this.searchTransformer.transformPeopleSearchResponse(res, includePrivateProfiles)
 
   }
 

@@ -1,20 +1,19 @@
-import { ProfileParser } from "../../src/parser/profile.parser.js"
-import { ProfileView } from "../../src/types/profile.type.js"
+import { ProfileTransformer } from "../../src/transformer/profile.transformer.js"
+import type { ProfileView } from "../../src/types/profile.type.js"
 import { readJsonFromFile, writeJsonToFile } from "../core/test-util.js"
 
 describe('LocalCredentialStore', () => {
-   let parser: ProfileParser
+   let transformer: ProfileTransformer
     
     beforeAll(async () => {
-        parser = new ProfileParser()
-        
+        transformer = new ProfileTransformer()
     })
 
     it('parseProfile()', async () => {
         const rawProfilePath = `./test/example/profile-raw-full-chrispawley.json`
         const rawProfile = await readJsonFromFile(rawProfilePath) as ProfileView;
         //console.log(rawProfile)
-        const parsedProfile = parser.parseProfile(rawProfile)
+        const parsedProfile = transformer.transformProfile(rawProfile)
         console.log(JSON.stringify(parsedProfile, null, 2))
         const parsedProfilePath = rawProfilePath.replace('raw', 'parsed')
         await writeJsonToFile(parsedProfile, parsedProfilePath)

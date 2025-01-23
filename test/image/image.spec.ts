@@ -1,6 +1,6 @@
 import { resolveImageUrl } from "../../src/core/linkedin-utils.js"
 import { VectorImage } from "../../src/index.js"
-import { ProfileParser } from "../../src/parser/profile.parser.js"
+import { ProfileParser } from "../../src/transformer/profile.transformer.js"
 import { ProfileView } from "../../src/types/profile.type.js"
 import { isValidUrl, readJsonFromFile, writeJsonToFile } from "../core/test-util.js"
 

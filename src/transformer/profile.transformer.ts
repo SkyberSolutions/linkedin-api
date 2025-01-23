@@ -2,16 +2,16 @@ import { getIdFromUrn, resolveLinkedVectorImageUrl, stringifyLinkedInDate } from
 import type { PagedList } from "../types/index.js"
 import type { EducationItem, EducationView, ExperienceItem, PositionView, Profile, ProfileView } from "../types/profile.type.js"
 
-export class ProfileParser {
+export class ProfileTransformer {
 
-    parseProfile(rawProfile: ProfileView): Profile {
+    transformProfile(rawProfile: ProfileView): Profile {
         
         const { profile, educationView, positionView } = rawProfile
         const miniProfile = profile.miniProfile
     
-        const education: Profile['education'] = this.parseEducationView(educationView)
+        const education: Profile['education'] = this.transformEducationView(educationView)
     
-        const experience: Profile['experience'] = this.parsePositionView(positionView)
+        const experience: Profile['experience'] = this.transformPositionView(positionView)
     
         // TODO: add other sections (skills, recommendations, etc.)
         const result: Profile = {
@@ -39,7 +39,7 @@ export class ProfileParser {
         return result
       }
 
-    parseEducationView(educationView: EducationView | undefined): PagedList<EducationItem> | undefined {
+    transformEducationView(educationView: EducationView | undefined): PagedList<EducationItem> | undefined {
 
         const education: PagedList<EducationItem> | undefined = educationView
           ? {
@@ -72,7 +72,7 @@ export class ProfileParser {
         return education
       }
     
-      parsePositionView(positionView: PositionView | undefined): PagedList<ExperienceItem> | undefined {
+      transformPositionView(positionView: PositionView | undefined): PagedList<ExperienceItem> | undefined {
     
         const experience: PagedList<ExperienceItem> | undefined = positionView
           ? {
