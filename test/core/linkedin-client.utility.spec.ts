@@ -47,6 +47,11 @@ describe('LinkedInClient', () => {
     await writeJsonToFile(res, `./example/profile/profile-view-with-recommendations-${id}.json`);
   }, 30_000)
 
+  it("SAVE: getProfileView(id) with fullProfile==true and recommendations==true", async () => {
+    const res = await linkedin.profile.getProfileView('chrispawley', {fullProfile: true, recommendations: true})
+    await writeJsonToFile(res, `./example/profile/profile-view-full-with-recommendations-${id}.json`);
+  }, 30_000)
+
   it("SAVE: getProfilePositions(id)", async () => {
     const res = await linkedin.profile.getProfilePositions(id)
     await writeJsonToFile(res, `./example/profile/profile-positions-${id}.json`);

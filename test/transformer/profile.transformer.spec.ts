@@ -1,5 +1,5 @@
 import { ProfileTransformer } from "../../src/transformer/profile.transformer.js"
-import type { ProfileView } from "../../src/types/profile.type.js"
+import type { ProfileView } from "../../src/types/profile-raw.type.js"
 import { readJsonFromFile, writeJsonToFile } from "../core/test-util.js"
 
 describe('LocalCredentialStore', () => {
@@ -9,14 +9,15 @@ describe('LocalCredentialStore', () => {
         transformer = new ProfileTransformer()
     })
 
-    it('parseProfile()', async () => {
-        const rawProfilePath = `./test/example/profile-raw-full-chrispawley.json`
-        const rawProfile = await readJsonFromFile(rawProfilePath) as ProfileView;
+    it('transformProfile()', async () => {
+        const profileViewPath = `./example/profile/profile-view-full-with-recommendations-chrispawley.json`
+        const transformedProfilePath = `./example/profile/transformed/profile-full-with-recommendations-chrispawley.json`
+        const profileView = await readJsonFromFile(profileViewPath) as ProfileView;
         //console.log(rawProfile)
-        const parsedProfile = transformer.transformProfile(rawProfile)
-        console.log(JSON.stringify(parsedProfile, null, 2))
-        const parsedProfilePath = rawProfilePath.replace('raw', 'parsed')
-        await writeJsonToFile(parsedProfile, parsedProfilePath)
+        const transformedProfile = transformer.transformProfile(profileView)
+        //console.log(JSON.stringify(transformedProfile, null, 2))
+        
+        await writeJsonToFile(transformedProfile, transformedProfilePath)
 
     }, 30_000)
 
